@@ -1,0 +1,32 @@
+app: 
+  image: busybox
+  volumes: 
+    - ./src/.:/var/www/app
+
+mysql: 
+  image: mariadb
+  environment: 
+    MYSQL_ALLOW_EMPTY_PASSWORD: yes
+    MYSQL_USER: dbuser
+    MYSQL_PASSWORD: dbpass
+    MYSQL_DATABASE: linkshortner
+  ports:
+    - "13306:3306"
+  volumes: 
+    - ./sql/.:/docker-entrypoint-initdb.d
+
+nginx: 
+  build: docker/images/nginx 
+  ports: 
+    - "8080:80" 
+  links: 
+    - php
+  volumes_from: 
+    - app 
+
+php: 
+  image: php:5.6-fpm
+  volumes_from: 
+    - app 
+  links: 
+    - mysql  
